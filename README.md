@@ -1,123 +1,149 @@
-# Tasque Manager — Fullstack (Spring Boot + React)
+Tasque Manager — Fullstack (Spring Boot API + React SPA)
 
-Tasque Manager is a fullstack task management application built as a single repository
-with a Spring Boot backend and a React frontend.
+Tasque Manager is a fullstack task management application built as a production-oriented MVP.
 
-The project is designed as a production-oriented MVP with a clean architecture,
-database migrations, and a modern frontend toolchain.
+The project follows a clean, layered architecture and deliberately separates backend and frontend to reflect real-world production practices.
+
+
+---
+
+Architecture Overview
+
+The application consists of two independent parts:
+
+Backend — a standalone Spring Boot REST API
+
+Frontend — a standalone React SPA that communicates with the backend over HTTP
+
+
+PostgreSQL
+    ↑
+Spring Boot (REST API)
+    ↑
+React SPA (Vite / Browser)
+
+The frontend is not embedded into the backend by default and can be deployed separately (e.g. Nginx, CDN, Vercel). This design allows independent development, deployment, and scaling of each layer.
+
 
 ---
 
 ## Tech Stack
 
-### Backend
+Backend:
+Java 17
+Spring Boot
+Spring Web
+Spring Data JPA
+Flyway
+PostgreSQL
+Maven
 
-* Java 17
-* Spring Boot
-* Spring Web
-* Spring Data JPA
-* Flyway
-* PostgreSQL
-* Maven
-
-### Frontend
-
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* DaisyUI
+Frontend:
+React
+TypeScript
+Vite
+Tailwind CSS
+DaisyUI
 
 ---
 
-## Features
+Features:
+REST API for task management (CRUD)
+Filtering, pagination, and sorting
+PostgreSQL persistence
+Database schema versioning with Flyway
+Optimistic locking (@Version)
+Clean separation: Controller → Service → Repository
+Global exception handling
+Ready for Docker-based deployment
 
-* REST API for task management (CRUD)
-* PostgreSQL persistence
-* Database schema versioning with Flyway
-* React SPA frontend
-* Monorepo structure (backend + frontend)
-* Prepared for Docker-based deployment
 
 ---
 
-## Repository Structure
+Repository Structure
 
-```
 /
 ├── pom.xml                         # Backend build configuration
-├── Dockerfile                      # Spring Boot application image
-├── docker-compose.yml              # PostgreSQL + app (optional)
+├── Dockerfile                      # Spring Boot backend image
+├── docker-compose.yml              # PostgreSQL (backend can be added optionally)
 ├── frontend/                       # React (Vite) frontend
 ├── src/main/java                   # Spring Boot source code
 ├── src/main/resources
 │   └── db/migration                # Flyway SQL migrations
 └── README.md
-```
+
 
 ---
 
-## Database Migrations
+Database Migrations
 
 Flyway migrations are located in:
 
-```
 src/main/resources/db/migration
-```
 
 Current migrations:
 
-* `V1__create_tasks_table.sql`
-* `V2__create_task_status_enum.sql`
-* `V3__create_task_priority_enum.sql`
+V1__create_tasks_table.sql
+
+V2__create_task_status_enum.sql
+
+V3__create_task_priority_enum.sql
+
+
 
 ---
 
-## Running the Application (Development)
+Running the Application (Development)
 
-### 1. Start PostgreSQL
+1. Start PostgreSQL
 
-You can use Docker:
+Using Docker:
 
 docker-compose up -d db
 
-Or run PostgreSQL manually and update `application.yml`.
+Or run PostgreSQL manually and update application.yml accordingly.
+
 
 ---
 
-### 2. Build and Run Backend
+2. Run Backend (Spring Boot API)
 
 mvn clean package
-
 java -jar target/tasque-manager-0.0.1-SNAPSHOT.jar
 
 Backend will be available at:
+
 http://localhost:8080
 
-API base URL:
-http://localhost:8080/api
+API base URL: http://localhost:8080/api
+
+
 
 ---
 
-## Frontend Development (Optional)
+3. Run Frontend (React SPA)
 
-For faster frontend iteration, you can run the frontend separately.
+For development with hot reload:
+
 cd frontend
 npm install
 npm run dev
 
 Frontend dev server:
+
 http://localhost:5173
 
-The frontend can be configured to proxy API requests to the backend.
+
+The frontend communicates with the backend via REST API and can be configured to proxy requests during development.
+
 
 ---
 
-## Configuration
+Configuration
 
-### Backend
+Backend
 
-Database configuration is defined in `application.yml`:
+Database configuration is defined in application.yml:
 
 spring:
   datasource:
@@ -127,32 +153,54 @@ spring:
 
 For production, environment variables should be used instead.
 
+
 ---
 
-## Docker (Production-like Setup)
+Docker (Production-like Setup)
+
+This setup runs PostgreSQL + backend. Frontend is expected to be deployed separately.
 
 mvn clean package -DskipTests
-docker build -t tasque-manager .
-docker-compose up -
 
-This setup runs:
-- PostgreSQL
-- Spring Boot backend
+docker build -t tasque-manager-backend .
 
-Frontend is not bundled into the backend container
-and can be deployed separately.
+docker-compose up -d
 
 
 ---
 
-## Project Status
+Design Notes
+
+Backend and frontend are intentionally decoupled
+
+Backend is designed as a reusable API for multiple clients
+
+Frontend can be replaced or extended without backend changes
+
+The project focuses on correctness, structure, and maintainability rather than feature bloat
+
+
+
+---
+
+Project Status
 
 This project represents a functional MVP.
-Further improvements (security, tests, CI/CD, deployment optimizations)
-are planned but intentionally kept out of the initial version.
+
+Planned improvements (out of scope for the current version):
+
+Authentication & authorization
+
+Automated tests
+
+OpenAPI / Swagger documentation
+
+CI/CD pipeline
+
+
 
 ---
 
-## License
+License
 
 MIT
