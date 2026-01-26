@@ -1,4 +1,4 @@
-# Tasque Manager - Fullstack (Spring Boot API + React SPA)
+# Tasque Manager/Task Manager - Fullstack (Spring Boot API + React SPA)
 
 Tasque Manager is a fullstack task management application built as a **production‑oriented MVP**.
 
