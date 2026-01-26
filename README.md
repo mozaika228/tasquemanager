@@ -82,10 +82,9 @@ src/main/resources/db/migration
 
 Current migrations:
 
-* `V1__create_tasks_table.sql`
-* `V2__create_task_status_enum.sql`
-* `V3__create_task_priority_enum.sql`
-
+* `V1__create_task_status_enum.sql`
+* `V2__create_task_priority_enum.sql`
+* `V3__create_tasks_table.sql`
 ---
 
 ## Running the Application (Development)
