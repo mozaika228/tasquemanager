@@ -116,7 +116,9 @@ Backend will be available at:
 For development with hot reload:
 
 cd frontend
+
 npm install
+
 npm run dev
 
 Frontend dev server:
@@ -133,11 +135,13 @@ The frontend communicates with the backend via REST API and can be configured to
 
 Database configuration is defined in `application.yml`:
 
+```yaml
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/tasque
     username: tasque_user
     password: secret
+```
 
 For production, environment variables should be used instead.
 
