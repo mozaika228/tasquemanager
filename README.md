@@ -88,6 +88,7 @@ Or run PostgreSQL manually and update `application.yml`.
 ### 2. Build and Run Backend
 
 mvn clean package
+
 java -jar target/tasque-manager-0.0.1-SNAPSHOT.jar
 
 Backend will be available at:
