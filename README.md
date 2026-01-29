@@ -102,6 +102,7 @@ Or run PostgreSQL manually and update `application.yml` accordingly.
 ### Run Backend (Spring Boot API)
 
 mvn clean package
+
 java -jar target/tasque-manager-0.0.1-SNAPSHOT.jar
 
 Backend will be available at:
