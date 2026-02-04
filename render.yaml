@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: tasquemanager
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: postgres
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: tasquemanager-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: tasquemanager-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: tasquemanager-db
+          property: password
+      - key: APP_JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: tasquemanager-db
+    plan: free
