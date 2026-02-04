@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: taskmanager
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  profiles:
+    active: h2
+
+server:
+  port: ${PORT:8080}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: "change-this-secret-in-prod-please-very-long"
+    access-expiration-minutes: 30
+    refresh-expiration-minutes: 43200
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"

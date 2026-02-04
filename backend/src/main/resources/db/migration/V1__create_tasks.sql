@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS tasks (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(120) NOT NULL,
+  description VARCHAR(1000),
+  status VARCHAR(20) NOT NULL,
+  due_date DATE,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+);

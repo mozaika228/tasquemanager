@@ -1,0 +1,111 @@
+﻿:root {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  color: #1b1b1b;
+  background: #f7f3ee;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-size: 42px;
+  margin: 0 0 8px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-bar {
+  margin-top: 12px;
+}
+
+.error {
+  color: #b00020;
+  margin: 0 0 16px;
+}
+
+.filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 16px;
+}
+
+input, textarea, select, button {
+  font: inherit;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d9d0c7;
+}
+
+button {
+  background: #1b1b1b;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+button.danger {
+  background: #d9372e;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.task {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e0d7cd;
+  border-radius: 14px;
+}
+
+.task.done {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #6b5f55;
+}
+
+.empty {
+  color: #6b5f55;
+}
