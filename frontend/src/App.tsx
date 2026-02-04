@@ -1,17 +1,20 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 
 function Home() {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-900 via-slate-900 to-black text-white">
       <div className="max-w-xl text-center space-y-6">
-        <h1 className="text-5xl font-bold tracking-tight">
-          Tasque Manager
-        </h1>
+        <h1 className="text-5xl font-bold tracking-tight">Tasque Manager</h1>
         <p className="text-slate-300 text-lg">
           A modern task management system built with Spring Boot and React.
         </p>
         <div className="flex justify-center gap-4">
-          <button className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition font-medium">
+          <button
+            onClick={() => navigate('/tasks')}
+            className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition font-medium"
+          >
             Get Started
           </button>
           <button className="px-6 py-3 rounded-xl border border-slate-600 hover:bg-slate-800 transition">
@@ -23,11 +26,20 @@ function Home() {
   )
 }
 
+function Tasks() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white text-3xl">
+      Tasks page works
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/tasks" element={<Tasks />} />
       </Routes>
     </BrowserRouter>
   )
