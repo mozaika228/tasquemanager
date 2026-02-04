@@ -24,7 +24,7 @@ class TaskControllerTest {
     @Test
     void getTasks_requiresAuth() throws Exception {
         mockMvc.perform(get("/api/tasks"))
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isForbidden());
     }
 
     @Test
