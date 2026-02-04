@@ -22,6 +22,8 @@ services:
           property: password
       - key: APP_JWT_SECRET
         generateValue: true
+      - key: PORT
+        value: 8080
 
 databases:
   - name: tasquemanager-db
