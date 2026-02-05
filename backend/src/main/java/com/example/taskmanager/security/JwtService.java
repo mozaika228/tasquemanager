@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class JwtService {
@@ -32,9 +33,13 @@ public class JwtService {
 
     public String generateAccessToken(UserDetails user) {
         Instant now = Instant.now();
+        List<String> roles = user.getAuthorities().stream()
+            .map(auth -> auth.getAuthority())
+            .toList();
         return Jwts.builder()
             .setSubject(user.getUsername())
             .claim("type", "access")
+            .claim("roles", roles)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plusSeconds(accessExpirationMinutes * 60)))
             .signWith(secretKey, SignatureAlgorithm.HS256)

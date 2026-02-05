@@ -6,26 +6,29 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final RefreshTokenStore refreshTokenStore;
 
     public AuthController(
         AuthenticationManager authenticationManager,
         UserDetailsService userDetailsService,
-        JwtService jwtService
+        JwtService jwtService,
+        RefreshTokenStore refreshTokenStore
     ) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.refreshTokenStore = refreshTokenStore;
     }
 
     @PostMapping("/login")
@@ -41,6 +44,7 @@ public class AuthController {
         UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        refreshTokenStore.store(user.getUsername(), refreshToken);
         return new AuthResponse(accessToken, refreshToken);
     }
 
@@ -55,12 +59,22 @@ public class AuthController {
         }
 
         UserDetails user = userDetailsService.loadUserByUsername(username);
-        if (!jwtService.isRefreshTokenValid(refreshToken, user)) {
+        if (!jwtService.isRefreshTokenValid(refreshToken, user) || !refreshTokenStore.isValid(username, refreshToken)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
         }
 
         String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
+        refreshTokenStore.store(username, newRefreshToken);
         return new AuthResponse(newAccessToken, newRefreshToken);
+    }
+
+    @PostMapping("/logout")
+    public void logout() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        refreshTokenStore.revoke(auth.getName());
     }
 }

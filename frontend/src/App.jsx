@@ -14,6 +14,10 @@ const emptyForm = {
   description: "",
   status: "TODO",
   priority: "MEDIUM",
+  assignee: "",
+  tags: "",
+  estimateHours: "",
+  archived: false,
   dueDate: ""
 };
 
@@ -30,14 +34,34 @@ export default function App() {
   const [filters, setFilters] = useState({
     status: "",
     priority: "",
+    archived: "false",
+    q: "",
+    dueDateFrom: "",
+    dueDateTo: "",
     sortBy: "createdAt",
     direction: "desc"
   });
+  const [pageInfo, setPageInfo] = useState({
+    page: 0,
+    size: 10,
+    totalPages: 1,
+    totalElements: 0
+  });
 
-  async function load(nextFilters = filters) {
+  async function load(nextFilters = filters, nextPage = pageInfo.page) {
     try {
-      const data = await getTasks(nextFilters);
-      setTasks(data);
+      const data = await getTasks({
+        ...nextFilters,
+        page: nextPage,
+        size: pageInfo.size
+      });
+      setTasks(data.content || []);
+      setPageInfo((prev) => ({
+        ...prev,
+        page: data.number ?? nextPage,
+        totalPages: data.totalPages ?? 1,
+        totalElements: data.totalElements ?? 0
+      }));
     } catch (err) {
       setError(err.message || "Failed to load tasks");
     }
@@ -64,7 +88,23 @@ export default function App() {
     const next = { ...filters, [name]: value };
     setFilters(next);
     if (isAuthed) {
-      load(next);
+      load(next, 0);
+    }
+  }
+  function handleSearchChange(e) {
+    const { value } = e.target;
+    const next = { ...filters, q: value };
+    setFilters(next);
+    if (isAuthed) {
+      load(next, 0);
+    }
+  }
+  function handleDateFilterChange(e) {
+    const { name, value } = e.target;
+    const next = { ...filters, [name]: value };
+    setFilters(next);
+    if (isAuthed) {
+      load(next, 0);
     }
   }
 
@@ -91,10 +131,11 @@ export default function App() {
     try {
       await createTask({
         ...form,
+        estimateHours: form.estimateHours ? Number(form.estimateHours) : null,
         dueDate: form.dueDate || null
       });
       setForm(emptyForm);
-      load();
+      load(filters, 0);
     } catch (err) {
       setError(err.message || "Failed to create task");
     }
@@ -115,9 +156,33 @@ export default function App() {
     setError("");
     try {
       await deleteTask(id);
-      load();
+      load(filters, 0);
     } catch (err) {
       setError(err.message || "Failed to delete task");
+    }
+  }
+
+  async function toggleArchive(task) {
+    setError("");
+    try {
+      await updateTask(task.id, { ...task, archived: !task.archived });
+      load(filters, pageInfo.page);
+    } catch (err) {
+      setError(err.message || "Failed to update task");
+    }
+  }
+
+  function nextPage() {
+    const next = Math.min(pageInfo.page + 1, pageInfo.totalPages - 1);
+    if (next !== pageInfo.page) {
+      load(filters, next);
+    }
+  }
+
+  function prevPage() {
+    const next = Math.max(pageInfo.page - 1, 0);
+    if (next !== pageInfo.page) {
+      load(filters, next);
     }
   }
 
@@ -171,10 +236,30 @@ export default function App() {
             onChange={handleChange}
             required
           />
+          <input
+            name="assignee"
+            placeholder="Assignee"
+            value={form.assignee}
+            onChange={handleChange}
+          />
           <textarea
             name="description"
             placeholder="Description"
             value={form.description}
+            onChange={handleChange}
+          />
+          <input
+            name="tags"
+            placeholder="Tags (comma separated)"
+            value={form.tags}
+            onChange={handleChange}
+          />
+          <input
+            type="number"
+            min="0"
+            name="estimateHours"
+            placeholder="Estimate hours"
+            value={form.estimateHours}
             onChange={handleChange}
           />
           <select name="status" value={form.status} onChange={handleChange}>
@@ -193,6 +278,15 @@ export default function App() {
             value={form.dueDate}
             onChange={handleChange}
           />
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              name="archived"
+              checked={form.archived}
+              onChange={(e) => setForm({ ...form, archived: e.target.checked })}
+            />
+            Archived
+          </label>
           <button type="submit">Add</button>
         </form>
       </section>
@@ -200,6 +294,12 @@ export default function App() {
       <section className="card">
         <h2>Tasks</h2>
         <div className="filters">
+          <input
+            name="q"
+            placeholder="Search..."
+            value={filters.q}
+            onChange={handleSearchChange}
+          />
           <select name="status" value={filters.status} onChange={handleFilterChange}>
             <option value="">All Statuses</option>
             <option value="TODO">TODO</option>
@@ -212,17 +312,41 @@ export default function App() {
             <option value="MEDIUM">MEDIUM</option>
             <option value="HIGH">HIGH</option>
           </select>
+          <select name="archived" value={filters.archived} onChange={handleFilterChange}>
+            <option value="false">Active</option>
+            <option value="true">Archived</option>
+          </select>
+          <input
+            type="date"
+            name="dueDateFrom"
+            value={filters.dueDateFrom}
+            onChange={handleDateFilterChange}
+          />
+          <input
+            type="date"
+            name="dueDateTo"
+            value={filters.dueDateTo}
+            onChange={handleDateFilterChange}
+          />
           <select name="sortBy" value={filters.sortBy} onChange={handleFilterChange}>
             <option value="createdAt">Created</option>
             <option value="dueDate">Due Date</option>
             <option value="priority">Priority</option>
             <option value="status">Status</option>
             <option value="title">Title</option>
+            <option value="assignee">Assignee</option>
           </select>
           <select name="direction" value={filters.direction} onChange={handleFilterChange}>
             <option value="desc">Desc</option>
             <option value="asc">Asc</option>
           </select>
+        </div>
+        <div className="pager">
+          <button onClick={prevPage} disabled={pageInfo.page === 0}>Prev</button>
+          <span>
+            Page {pageInfo.page + 1} / {pageInfo.totalPages} · {pageInfo.totalElements} tasks
+          </span>
+          <button onClick={nextPage} disabled={pageInfo.page >= pageInfo.totalPages - 1}>Next</button>
         </div>
         <div className="list">
           {tasks.map((task) => (
@@ -232,13 +356,19 @@ export default function App() {
                 <div className="meta">
                   <span>{task.status}</span>
                   <span>{task.priority}</span>
+                  {task.assignee && <span>Assignee: {task.assignee}</span>}
+                  {task.estimateHours != null && <span>{task.estimateHours}h</span>}
                   {task.dueDate && <span>Due: {task.dueDate}</span>}
                 </div>
                 {task.description && <p>{task.description}</p>}
+                {task.tags && <p className="tags">Tags: {task.tags}</p>}
               </div>
               <div className="actions">
                 <button onClick={() => toggleDone(task)}>
                   {task.status === "DONE" ? "Undo" : "Done"}
+                </button>
+                <button onClick={() => toggleArchive(task)}>
+                  {task.archived ? "Unarchive" : "Archive"}
                 </button>
                 <button className="danger" onClick={() => removeTask(task.id)}>
                   Delete

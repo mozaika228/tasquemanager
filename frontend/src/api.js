@@ -61,7 +61,11 @@ function buildQuery(params) {
 export async function getTasks(params = {}) {
   const query = buildQuery(params);
   const url = query ? `${baseUrl}?${query}` : baseUrl;
-  return request(url);
+  const data = await request(url);
+  if (Array.isArray(data)) {
+    return { content: data, totalPages: 1, totalElements: data.length, number: 0, size: data.length };
+  }
+  return data;
 }
 
 export async function createTask(task) {

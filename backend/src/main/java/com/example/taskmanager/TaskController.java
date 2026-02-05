@@ -1,15 +1,16 @@
 package com.example.taskmanager;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "http://localhost:5173")
 public class TaskController {
 
     private final TaskService service;
@@ -19,13 +20,25 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<Task> getAll(
+    public Page<Task> getAll(
         @RequestParam(required = false) TaskStatus status,
         @RequestParam(required = false) TaskPriority priority,
+        @RequestParam(defaultValue = "false") Boolean archived,
+        @RequestParam(required = false, name = "q") String query,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate dueDateFrom,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate dueDateTo,
         @RequestParam(defaultValue = "createdAt") String sortBy,
-        @RequestParam(defaultValue = "desc") String direction
+        @RequestParam(defaultValue = "desc") String direction,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
     ) {
-        return service.getAll(status, priority, sortBy, direction);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        int safePage = Math.max(page, 0);
+        return service.getAll(status, priority, archived, query, dueDateFrom, dueDateTo, sortBy, direction, safePage, safeSize);
     }
 
     @GetMapping("/{id}")

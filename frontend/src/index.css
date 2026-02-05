@@ -57,6 +57,34 @@ body {
   margin-bottom: 16px;
 }
 
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #6b5f55;
+}
+
+.pager button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 input, textarea, select, button {
   font: inherit;
   padding: 12px 14px;
@@ -104,6 +132,13 @@ button.danger {
   gap: 12px;
   font-size: 14px;
   color: #6b5f55;
+  flex-wrap: wrap;
+}
+
+.tags {
+  font-size: 13px;
+  color: #6b5f55;
+  margin: 8px 0 0;
 }
 
 .empty {

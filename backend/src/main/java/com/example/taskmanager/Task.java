@@ -3,6 +3,7 @@ package com.example.taskmanager;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +32,20 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TaskPriority priority = TaskPriority.MEDIUM;
+
+    @Size(max = 80)
+    @Column(length = 80)
+    private String assignee;
+
+    @Size(max = 255)
+    @Column(length = 255)
+    private String tags;
+
+    @Min(0)
+    private Integer estimateHours;
+
+    @Column(nullable = false)
+    private Boolean archived = false;
 
     private LocalDate dueDate;
 
@@ -90,6 +105,38 @@ public class Task {
 
     public void setPriority(TaskPriority priority) {
         this.priority = priority;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public Integer getEstimateHours() {
+        return estimateHours;
+    }
+
+    public void setEstimateHours(Integer estimateHours) {
+        this.estimateHours = estimateHours;
+    }
+
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
     }
 
     public LocalDate getDueDate() {
