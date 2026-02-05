@@ -1,8 +1,8 @@
 # Tasque Manager/Task Manager - Fullstack (Spring Boot API + React SPA)
 
-Tasque Manager is a fullstack task management application built as a **production‑oriented MVP**.
+Tasque Manager is a fullstack task management application built as a production-oriented MVP.
 
-The project follows a clean, layered architecture and deliberately separates backend and frontend to reflect real‑world production practices.
+The project follows a clean, layered architecture and deliberately separates backend and frontend to reflect real-world production practices.
 
 ---
 
@@ -14,10 +14,10 @@ The application consists of two independent parts:
 * **Frontend** - standalone React SPA communicating with the backend over HTTP
 
 ```
-PostgreSQL  →  Spring Boot (REST API)  →  React SPA (Vite / Browser)
+PostgreSQL -> Spring Boot (REST API) -> React SPA (Vite / Browser)
 ```
 
-The frontend is **not embedded** into the backend by default and can be deployed separately (e.g. Nginx, CDN, Vercel). This design enables independent development, deployment, and scaling of each layer.
+The frontend is not embedded into the backend by default and can be deployed separately (e.g. Nginx, CDN, Vercel). This design enables independent development, deployment, and scaling of each layer.
 
 ---
 
@@ -50,9 +50,13 @@ The frontend is **not embedded** into the backend by default and can be deployed
 * PostgreSQL persistence
 * Database schema versioning with Flyway
 * Optimistic locking (`@Version`)
-* Clean layered architecture: **Controller → Service → Repository**
+* Clean layered architecture: **Controller -> Service -> Repository**
 * Global exception handling
-* Ready for Docker‑based deployment
+* Authentication and authorization (JWT)
+* OpenAPI / Swagger documentation
+* Automated tests
+* CI/CD pipeline
+* Ready for Docker-based deployment
 
 ---
 
@@ -60,14 +64,15 @@ The frontend is **not embedded** into the backend by default and can be deployed
 
 ```
 /
-├── pom.xml                    # Backend build configuration
-├── Dockerfile                 # Spring Boot backend image
-├── docker-compose.yml         # PostgreSQL (backend optional)
-├── frontend/                  # React (Vite) frontend
-├── src/main/java              # Spring Boot source code
-├── src/main/resources
-│   └── db/migration           # Flyway SQL migrations
-└── README.md
+|-- backend/
+|   |-- pom.xml                 # Backend build configuration
+|   |-- src/main/java           # Spring Boot source code
+|   |-- src/main/resources
+|   |   `-- db/migration        # Flyway SQL migrations
+|-- frontend/                   # React (Vite) frontend
+|-- Dockerfile                  # Spring Boot backend image
+|-- docker-compose.yml          # PostgreSQL (backend optional)
+`-- README.md
 ```
 
 ---
@@ -77,14 +82,21 @@ The frontend is **not embedded** into the backend by default and can be deployed
 Flyway migrations are located in:
 
 ```
-src/main/resources/db/migration
+backend/src/main/resources/db/migration
 ```
 
 Current migrations:
 
-* `V1__create_task_status_enum.sql`
-* `V2__create_task_priority_enum.sql`
-* `V3__create_tasks_table.sql`
+* `V1__create_tasks.sql`
+* `V2__add_indexes.sql`
+* `V4__add_priority.sql`
+
+Seed data (repeatable):
+
+```
+backend/src/main/resources/db/seed/R__seed_tasks.sql
+```
+
 ---
 
 ## Running the Application (Development)
@@ -93,22 +105,30 @@ Current migrations:
 
 Using Docker:
 
+```
 docker-compose up -d db
+```
 
-Or run PostgreSQL manually and update `application.yml` accordingly.
+Or run PostgreSQL manually and update `application-postgres.yml` accordingly.
 
 ---
 
 ### Run Backend (Spring Boot API)
 
+```
+cd backend
 mvn clean package
-
-java -jar target/tasque-manager-0.0.1-SNAPSHOT.jar
+java -jar target/taskmanager-0.0.1-SNAPSHOT.jar
+```
 
 Backend will be available at:
 
-* [http://localhost:8080](http://localhost:8080)
-* API base URL: [http://localhost:8080/api](http://localhost:8080/api)
+* http://localhost:8080
+* API base URL: http://localhost:8080/api
+
+Swagger UI:
+
+* http://localhost:8080/swagger-ui.html
 
 ---
 
@@ -116,15 +136,15 @@ Backend will be available at:
 
 For development with hot reload:
 
+```
 cd frontend
-
 npm install
-
 npm run dev
+```
 
 Frontend dev server:
 
-* [http://localhost:5173](http://localhost:5173)
+* http://localhost:5173
 
 The frontend communicates with the backend via REST API and can be configured to proxy requests during development.
 
@@ -134,30 +154,40 @@ The frontend communicates with the backend via REST API and can be configured to
 
 ### Backend
 
-Database configuration is defined in `application.yml`:
+Database configuration is defined in `backend/src/main/resources/application-postgres.yml`:
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/tasque
-    username: tasque_user
-    password: secret
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 ```
 
 For production, environment variables should be used instead.
 
+JWT settings are defined in `backend/src/main/resources/application.yml`:
+
+```yaml
+app:
+  jwt:
+    secret: "change-this-secret-in-prod-please-very-long"
+    access-expiration-minutes: 30
+    refresh-expiration-minutes: 43200
+```
+
 ---
 
-## Docker (Production‑like Setup)
+## Docker (Production-like Setup)
 
-This setup runs **PostgreSQL + backend**. The frontend is expected to be deployed separately.
+This setup runs PostgreSQL + backend. The frontend is expected to be deployed separately.
 
+```
+cd backend
 mvn clean package -DskipTests
-
 docker build -t tasque-manager-backend .
-
 docker-compose up -d
-
+```
 
 ---
 
@@ -172,14 +202,7 @@ docker-compose up -d
 
 ## Project Status
 
-This project represents a **functional MVP**.
-
-Planned improvements (out of scope for the current version):
-
-* Authentication & authorization
-* Automated tests
-* OpenAPI / Swagger documentation
-* CI/CD pipeline
+This project represents a functional MVP with authentication, tests, OpenAPI docs, and CI/CD.
 
 ---
 
