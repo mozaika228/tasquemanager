@@ -18,7 +18,7 @@ springdoc:
 
 app:
   jwt:
-    secret: "change-this-secret-in-prod-please-very-long"
+    secret: "${APP_JWT_SECRET:change-this-secret-in-prod-please-very-long}"
     access-expiration-minutes: 30
     refresh-expiration-minutes: 43200
 
@@ -26,4 +26,18 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: "health,info,prometheus"
+  metrics:
+    distribution:
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+      percentiles-histogram:
+        http.server.requests: true
+
+logging:
+  level:
+    root: INFO
+
+loki:
+  url: ${LOKI_URL:}
+  app: taskmanager

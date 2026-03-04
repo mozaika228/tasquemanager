@@ -1,211 +1,141 @@
-# Tasque Manager/Task Manager - Fullstack (Spring Boot API + React SPA)
+# Tasque Manager
 
-Tasque Manager is a fullstack task management application built as a production-oriented MVP.
+![Backend Coverage](https://img.shields.io/badge/backend%20coverage-62.43%25-brightgreen)
+![Frontend Coverage](https://img.shields.io/badge/frontend%20coverage-77.77%25-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-The project follows a clean, layered architecture and deliberately separates backend and frontend to reflect real-world production practices.
+Fullstack task manager: Spring Boot API + React SPA.
 
----
+## Architecture
 
-## Architecture Overview
+```mermaid
+flowchart LR
+    U[User Browser] --> FE[React SPA\nVite + Tailwind + DaisyUI]
+    FE -->|JWT / REST| BE[Spring Boot API]
 
-The application consists of two independent parts:
-
-* **Backend** - standalone Spring Boot REST API
-* **Frontend** - standalone React SPA communicating with the backend over HTTP
-
-```
-PostgreSQL -> Spring Boot (REST API) -> React SPA (Vite / Browser)
-```
-
-The frontend is not embedded into the backend by default and can be deployed separately (e.g. Nginx, CDN, Vercel). This design enables independent development, deployment, and scaling of each layer.
-
----
-
-## Tech Stack
-
-### Backend
-
-* Java 17
-* Spring Boot
-* Spring Web
-* Spring Data JPA
-* Flyway
-* PostgreSQL
-* Maven
-
-### Frontend
-
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* DaisyUI
-
----
-
-## Features
-
-* REST API for task management (CRUD)
-* Filtering, pagination, and sorting
-* PostgreSQL persistence
-* Database schema versioning with Flyway
-* Optimistic locking (`@Version`)
-* Clean layered architecture: **Controller -> Service -> Repository**
-* Global exception handling
-* Authentication and authorization (JWT)
-* OpenAPI / Swagger documentation
-* Automated tests
-* CI/CD pipeline
-* Ready for Docker-based deployment
-
----
-
-## Repository Structure
-
-```
-/
-|-- backend/
-|   |-- pom.xml                 # Backend build configuration
-|   |-- src/main/java           # Spring Boot source code
-|   |-- src/main/resources
-|   |   `-- db/migration        # Flyway SQL migrations
-|-- frontend/                   # React (Vite) frontend
-|-- Dockerfile                  # Spring Boot backend image
-|-- docker-compose.yml          # PostgreSQL (backend optional)
-`-- README.md
+    subgraph Backend
+      BE --> SEC[Security Layer\nJWT Filter + RBAC]
+      BE --> SVC[Service Layer]
+      SVC --> REP[Repository Layer\nSpring Data JPA]
+      REP --> DB[(PostgreSQL)]
+      BE --> FW[Flyway Migrations]
+      BE --> EXP[Export Service\nCSV / PDF]
+      BE --> OBS[Actuator + Micrometer]
+      OBS --> PR[/Prometheus scrape/]
+      BE -. optional .-> LOKI[(Grafana Loki)]
+      BE -. optional .-> MAIL[SMTP Mail]
+    end
 ```
 
----
+## Stack
+
+- Backend: Java 17, Spring Boot 3.3, Spring Security (JWT), Spring Data JPA, Flyway, PostgreSQL, Micrometer/Prometheus, Logback + Loki appender
+- Frontend: React 18, Vite, Tailwind CSS, DaisyUI, react-beautiful-dnd
+- Testing: JUnit 5 + Mockito + MockMvc, Jest + React Testing Library
+
+## Main Features
+
+- Auth (JWT access + refresh)
+- Tasks CRUD with filtering, sorting, pagination
+- Dark mode UI
+- Create/edit task in modal windows
+- Kanban drag-and-drop between statuses
+- Overdue progress visualization
+- Task comments with `@mentions`
+- File attachments (upload/download)
+- Notifications (in-app, plus optional email channel)
+- Export tasks to CSV/PDF
+
+## Observability
+
+- Spring Actuator enabled
+- Prometheus endpoint: `/actuator/prometheus`
+- HTTP metrics with percentiles, including p99
+- Optional Loki shipping via `LOKI_URL`
+
+## Project Structure
+
+```text
+backend/
+  src/main/java/com/example/taskmanager
+  src/main/resources
+frontend/
+  src/
+```
 
 ## Database Migrations
 
-Flyway migrations are located in:
+`backend/src/main/resources/db/migration`
 
-```
-backend/src/main/resources/db/migration
-```
+- `V1__create_tasks.sql`
+- `V2__add_indexes.sql`
+- `V4__add_priority.sql`
+- `V5__add_task_fields.sql`
+- `V6__comments_attachments_notifications.sql`
 
-Current migrations:
+Seed data:
 
-* `V1__create_tasks.sql`
-* `V2__add_indexes.sql`
-* `V4__add_priority.sql`
+- `backend/src/main/resources/db/seed/R__seed_tasks.sql`
 
-Seed data (repeatable):
+## Run Locally
 
-```
-backend/src/main/resources/db/seed/R__seed_tasks.sql
-```
+### 1) Database
 
----
-
-## Running the Application (Development)
-
-### Start PostgreSQL
-
-Using Docker:
-
-```
+```bash
 docker-compose up -d db
 ```
 
-Or run PostgreSQL manually and update `application-postgres.yml` accordingly.
+### 2) Backend
 
----
-
-### Run Backend (Spring Boot API)
-
-```
+```bash
 cd backend
-mvn clean package
-java -jar target/taskmanager-0.0.1-SNAPSHOT.jar
+mvn clean spring-boot:run
 ```
 
-Backend will be available at:
+Required env for postgres profile:
 
-* http://localhost:8080
-* API base URL: http://localhost:8080/api
+- `SPRING_PROFILES_ACTIVE=postgres`
+- `SPRING_DATASOURCE_URL`
+- `SPRING_DATASOURCE_USERNAME`
+- `SPRING_DATASOURCE_PASSWORD`
+- `APP_JWT_SECRET`
 
-Swagger UI:
+### 3) Frontend
 
-* http://localhost:8080/swagger-ui.html
-
----
-
-### Run Frontend (React SPA)
-
-For development with hot reload:
-
-```
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Frontend dev server:
+## Testing
 
-* http://localhost:5173
+Backend:
 
-The frontend communicates with the backend via REST API and can be configured to proxy requests during development.
-
----
-
-## Configuration
-
-### Backend
-
-Database configuration is defined in `backend/src/main/resources/application-postgres.yml`:
-
-```yaml
-spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-```
-
-For production, environment variables should be used instead.
-
-JWT settings are defined in `backend/src/main/resources/application.yml`:
-
-```yaml
-app:
-  jwt:
-    secret: "change-this-secret-in-prod-please-very-long"
-    access-expiration-minutes: 30
-    refresh-expiration-minutes: 43200
-```
-
----
-
-## Docker (Production-like Setup)
-
-This setup runs PostgreSQL + backend. The frontend is expected to be deployed separately.
-
-```
+```bash
 cd backend
-mvn clean package -DskipTests
-docker build -t tasque-manager-backend .
-docker-compose up -d
+mvn test
+mvn verify
 ```
 
----
+Frontend:
 
-## Design Notes
+```bash
+cd frontend
+npm install
+npm test
+```
 
-* Backend and frontend are intentionally decoupled
-* Backend is designed as a reusable API for multiple clients
-* Frontend can be replaced or extended without backend changes
-* Focus on correctness, structure, and maintainability rather than feature bloat
+Coverage (latest local run):
 
----
+- Backend JaCoCo LINE: `62.43%`
+- Frontend Jest global: lines `77.77%`, branches `51.72%`, functions `60%`, statements `77.77%`
 
-## Project Status
+## API Docs
 
-This project represents a functional MVP with authentication, tests, OpenAPI docs, and CI/CD.
-
----
+- Swagger UI: `/swagger-ui.html`
+- OpenAPI: `/v3/api-docs`
 
 ## License
 
-MIT
+MIT, see `LICENSE`.

@@ -1,5 +1,6 @@
 const baseUrl = "/api/tasks";
 const authUrl = "/api/auth";
+const notificationUrl = "/api/notifications";
 const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
 
@@ -27,15 +28,22 @@ async function request(url, options = {}) {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+
   const res = await fetch(url, { ...options, headers });
   const text = await res.text();
+
   if (!res.ok) {
     throw new Error(text || res.statusText);
   }
   if (!text) {
     return null;
   }
-  return JSON.parse(text);
+
+  const contentType = res.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return JSON.parse(text);
+  }
+  return text;
 }
 
 export async function login(username, password) {
@@ -51,7 +59,7 @@ export async function login(username, password) {
 function buildQuery(params) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (value) {
+    if (value !== undefined && value !== null && value !== "") {
       query.set(key, value);
     }
   });
@@ -86,4 +94,49 @@ export async function updateTask(id, task) {
 
 export async function deleteTask(id) {
   return request(`${baseUrl}/${id}`, { method: "DELETE" });
+}
+
+export async function getComments(taskId) {
+  return request(`${baseUrl}/${taskId}/comments`);
+}
+
+export async function addComment(taskId, author, content) {
+  return request(`${baseUrl}/${taskId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ author, content })
+  });
+}
+
+export async function getAttachments(taskId) {
+  return request(`${baseUrl}/${taskId}/attachments`);
+}
+
+export async function uploadAttachment(taskId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request(`${baseUrl}/${taskId}/attachments`, {
+    method: "POST",
+    body: formData
+  });
+}
+
+export function attachmentDownloadUrl(taskId, attachmentId) {
+  return `${baseUrl}/${taskId}/attachments/${attachmentId}`;
+}
+
+export async function getNotifications() {
+  return request(notificationUrl);
+}
+
+export async function markNotificationRead(id) {
+  return request(`${notificationUrl}/${id}/read`, { method: "PATCH" });
+}
+
+export function exportCsvUrl() {
+  return "/api/tasks/export/csv";
+}
+
+export function exportPdfUrl() {
+  return "/api/tasks/export/pdf";
 }
