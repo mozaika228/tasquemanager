@@ -278,6 +278,32 @@ export default function App() {
     }
   }
 
+  async function downloadExport(kind) {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        throw new Error("Please login first");
+      }
+      const url = kind === "csv" ? exportCsvUrl() : exportPdfUrl();
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = kind === "csv" ? "tasks.csv" : "tasks.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      setError(err.message || "Export failed");
+    }
+  }
   const grouped = useMemo(() => {
     const result = { TODO: [], IN_PROGRESS: [], DONE: [] };
     tasks.forEach((t) => {
@@ -296,8 +322,8 @@ export default function App() {
           <div className="flex-none gap-2">
             <button className="btn btn-sm" onClick={() => setDark((v) => !v)}>{dark ? "Light" : "Dark"}</button>
             {isAuthed && <button className="btn btn-sm" onClick={() => setShowCreate(true)}>Create</button>}
-            <a className="btn btn-sm" href={exportCsvUrl()}>CSV</a>
-            <a className="btn btn-sm" href={exportPdfUrl()}>PDF</a>
+            <button className="btn btn-sm" onClick={() => downloadExport("csv")}>CSV</button>
+            <button className="btn btn-sm" onClick={() => downloadExport("pdf")}>PDF</button>
             {isAuthed ? <button className="btn btn-sm btn-error" onClick={handleLogout}>Logout</button> : null}
           </div>
         </div>
@@ -467,4 +493,5 @@ export default function App() {
     </div>
   );
 }
+
 
