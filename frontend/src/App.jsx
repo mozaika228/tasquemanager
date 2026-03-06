@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import {
   addComment,
   attachmentDownloadUrl,
@@ -467,3 +467,4 @@ export default function App() {
     </div>
   );
 }
+

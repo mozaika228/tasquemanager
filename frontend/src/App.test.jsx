@@ -3,7 +3,7 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 
-jest.mock("react-beautiful-dnd", () => ({
+jest.mock("@hello-pangea/dnd", () => ({
   DragDropContext: ({ children }) => <div>{children}</div>,
   Droppable: ({ children, droppableId }) => children({
     droppableProps: {},
@@ -77,5 +77,6 @@ describe("App", () => {
     });
   });
 });
+
 
 
